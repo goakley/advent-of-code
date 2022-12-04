@@ -34,10 +34,10 @@ where
 }
 
 fn value(c: char) -> u64 {
-    if c >= 'a' && c <= 'z' {
+    if ('a'..='z').contains(&c) {
         return 1 + ((c as u64) - ('a' as u64));
     }
-    if c >= 'A' && c <= 'Z' {
+    if ('A'..='Z').contains(&c) {
         return 27 + ((c as u64) - ('A' as u64));
     }
     panic!()

@@ -38,8 +38,7 @@ impl Input {
                         bench_scraper::find_cookies().unwrap();
                     let jar: reqwest::cookie::Jar = cookies_results
                         .into_iter()
-                        .map(|kbcookies| kbcookies.cookies)
-                        .flatten()
+                        .flat_map(|kbcookies| kbcookies.cookies)
                         .collect();
                     let builder = reqwest::blocking::Client::builder()
                         .user_agent("bandcamper")

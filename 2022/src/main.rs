@@ -7,7 +7,7 @@ mod day3;
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
-    day: i64
+    day: i64,
 }
 
 fn main() {
