@@ -25,7 +25,7 @@ impl std::str::FromStr for Pair {
     }
 }
 
-advent_2022::day_function!(2, input, {
+advent_2022::day_function!(4, input, {
     let pairs: Vec<Pair> = input.lines();
 
     let count: i64 = pairs
