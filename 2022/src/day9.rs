@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use std::cmp::max;
+use std::collections::HashSet;
 
 #[derive(Debug, PartialEq, Eq)]
 enum Direction {
@@ -30,9 +30,12 @@ fn shift(knots: &mut Vec<(i64, i64)>, direction: &Direction) {
         Direction::D => (knots[0].0, knots[0].1 + 1),
     };
     for i in 1..knots.len() {
-        let (dx, dy) = (knots[i-1].0 - knots[i].0, knots[i-1].1 - knots[i].1);
+        let (dx, dy) = (knots[i - 1].0 - knots[i].0, knots[i - 1].1 - knots[i].1);
         knots[i] = if (dx.abs() + dy.abs()) < 3 {
-            (knots[i].0 + dx.signum() * max(0, dx.abs() - 1), knots[i].1 + dy.signum() * max(0, dy.abs() - 1))
+            (
+                knots[i].0 + dx.signum() * max(0, dx.abs() - 1),
+                knots[i].1 + dy.signum() * max(0, dy.abs() - 1),
+            )
         } else {
             (knots[i].0 + dx.signum(), knots[i].1 + dy.signum())
         };
@@ -46,7 +49,7 @@ fn process(commands: &[(Direction, i64)], knot_count: usize) -> usize {
     for (direction, magnitude) in commands.iter() {
         for _ in 0..*magnitude {
             shift(&mut knots, direction);
-            positions.insert(knots[knots.len()-1]);
+            positions.insert(knots[knots.len() - 1]);
         }
     }
     positions.len()
@@ -54,5 +57,8 @@ fn process(commands: &[(Direction, i64)], knot_count: usize) -> usize {
 
 advent_2022::day_function!(6, input, {
     let commands: Vec<(Direction, i64)> = input.pairs();
-    (process(&commands, 2).to_string(), process(&commands, 10).to_string())
+    (
+        process(&commands, 2).to_string(),
+        process(&commands, 10).to_string(),
+    )
 });
