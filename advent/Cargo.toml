@@ -1,0 +1,13 @@
+[package]
+name = "advent"
+version = "0.1.0"
+authors = ["Glen Oakley <glen.oakley@discordapp.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bench_scraper = { version = "0.4", features = ["reqwest"] }
+clap = { version = "4.4", features = ["derive"] }
+nom = "7.1"
+reqwest = { version = "0.11", features = ["blocking"] }

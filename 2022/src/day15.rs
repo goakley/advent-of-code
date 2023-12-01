@@ -56,6 +56,52 @@ impl Bound {
     }
 }
 
+struct LR(i64, i64);
+
+impl LR {
+    fn add(&mut self, l: i64, r: i64) {
+        if l > self.1 || r < self.0 {
+            return false;
+        }
+        
+        true
+    }
+}
+
+fn flush(mut vs: Vec<(i64, i64)>) -> Vec<(i64, i64)> {
+    vs.sort();
+    let v = Vec::with_capacity(vs.len());
+    let mut vsi = vs.into_iter();
+    match vsi.next() {
+        None => v,
+        Some(mut candidate) => {
+            for (l, r) in vsi {
+            }
+        }
+    }
+}
+
+struct Seq(Vec<(i64,i64)>);
+
+
+impl Seq {
+    fn add(&mut self, l: i64, r: i64) {
+        s: Vec<(i64, i64)> = Vec::with_capacity(self.0.len() + 1);
+        for (a, b) in self.0.iter() {
+            if r < *a {
+                s.push((*a, *b));
+
+
+            if l > *b || r < *a {
+                s.push((*a, *b));
+            } else {
+                s.push((std::cmp::min(l, a), std::cmp::max(r, b)))
+            }
+        }
+        Seq(self.0.into_iter().fold(vec![], |s: Vec<(i64, i64)>, (l, r)| { todo!() }))
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq)]
 struct Reading(Point, Point);
 
