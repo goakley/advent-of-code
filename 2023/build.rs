@@ -21,21 +21,21 @@ fn main() {
             lines = format!("{}{} => day{}::solve(input),", lines, num, num);
         }
     }
-    let out_dir = env::var_os("OUT_DIR").unwrap();
-    let dest_path = Path::new(&out_dir).join("main.rs");
-    fs::write(
-        &dest_path,
-        format!(
-            "{}
-            advent::main!{{|_year, day, input| {{
-                match day {{
-                    {}
-                    _ => todo!(),
-                }}
-            }}}}
-            ",
-            mods, lines,
-        ),
+    let dest_path = Path::new(&env::var_os("CARGO_MANIFEST_DIR").unwrap())
+        .join("src")
+        .join("main.rs");
+    let tokens: proc_macro2::TokenStream = format!(
+        "{}
+        advent::main!{{|_year, day, input| {{
+            match day {{
+                {}
+                _ => todo!(),
+            }}
+        }}}}
+        ",
+        mods, lines,
     )
+    .parse()
     .unwrap();
+    fs::write(&dest_path, format!("{}", tokens)).unwrap();
 }

@@ -35,6 +35,7 @@ dependencies = [
  "bench_scraper",
  "clap",
  "nom",
+ "proc-macro2",
  "regex",
  "reqwest",
 ]
