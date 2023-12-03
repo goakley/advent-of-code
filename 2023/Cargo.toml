@@ -12,6 +12,7 @@ advent = { path = "../advent" }
 clap = { version = "4.4", features = ["derive"] }
 bench_scraper = { version = "0.4", features = ["reqwest"] }
 nom = "7.1"
+nom_locate = "4.2"
 reqwest = { version = "0.11", features = ["blocking"] }
 
 [build-dependencies]

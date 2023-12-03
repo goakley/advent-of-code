@@ -1,4 +1,5 @@
 use nom::Finish;
+use std::collections::HashMap;
 use std::io::Read;
 use std::path::PathBuf;
 
@@ -154,5 +155,31 @@ impl Input {
         .finish()
         .unwrap()
         .1
+    }
+
+    pub fn grid<T>(&self) -> HashMap<(usize, usize), T>
+    where
+        T: From<char>,
+    {
+        let vecvec: Vec<Vec<char>> =
+            nom::combinator::all_consuming(nom::multi::many0(nom::sequence::terminated(
+                nom::multi::many0(nom::sequence::preceded(
+                    nom::combinator::not(nom::character::complete::line_ending),
+                    nom::character::complete::anychar::<_, nom::error::VerboseError<_>>,
+                )),
+                nom::character::complete::line_ending,
+            )))(self.str())
+            .finish()
+            .unwrap()
+            .1;
+        vecvec
+            .into_iter()
+            .enumerate()
+            .flat_map(|(x, vec)| {
+                vec.into_iter()
+                    .enumerate()
+                    .map(move |(y, c)| ((x, y), c.into()))
+            })
+            .collect()
     }
 }
