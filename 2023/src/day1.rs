@@ -1,6 +1,6 @@
 /// Convert a number (digit or word) to a u32, consuming the numeric representation
 fn parse_number(input: &str) -> nom::IResult<&str, u32> {
-    return nom::branch::alt((
+    nom::branch::alt((
         nom::combinator::value(0, nom::bytes::complete::tag_no_case("zero")),
         nom::combinator::value(1, nom::bytes::complete::tag_no_case("one")),
         nom::combinator::value(2, nom::bytes::complete::tag_no_case("two")),
@@ -12,7 +12,7 @@ fn parse_number(input: &str) -> nom::IResult<&str, u32> {
         nom::combinator::value(8, nom::bytes::complete::tag_no_case("eight")),
         nom::combinator::value(9, nom::bytes::complete::tag_no_case("nine")),
         nom::combinator::map_opt(nom::character::complete::anychar, |c| c.to_digit(10)),
-    ))(input);
+    ))(input)
 }
 
 /// Get all the numbers (digit or word) from some text
@@ -25,7 +25,7 @@ fn identify_numbers(input: &str) -> Vec<u32> {
     .unwrap()
     .1
     .into_iter()
-    .filter_map(|x| x)
+    .flatten()
     .collect()
 }
 

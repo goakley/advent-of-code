@@ -5,10 +5,12 @@ use nom::multi::{many0, separated_list0};
 use nom::sequence::{delimited, pair, separated_pair, terminated};
 use std::collections::HashMap;
 
+type Game<'a> = Vec<HashMap<&'a str, u32>>;
+
 /// Turn a game line into structure data
 ///
 /// "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
-fn parse_game(input: &str) -> nom::IResult<&str, (u32, Vec<HashMap<&str, u32>>)> {
+fn parse_game(input: &str) -> nom::IResult<&str, (u32, Game)> {
     pair(
         delimited(tag("Game "), nomu32, tag(": ")),
         separated_list0(
@@ -22,7 +24,7 @@ fn parse_game(input: &str) -> nom::IResult<&str, (u32, Vec<HashMap<&str, u32>>)>
 }
 
 /// Turn multiple game lines into structured data
-fn parse_games(input: &str) -> nom::IResult<&str, HashMap<u32, Vec<HashMap<&str, u32>>>> {
+fn parse_games(input: &str) -> nom::IResult<&str, HashMap<u32, Game>> {
     map(complete(many0(terminated(parse_game, line_ending))), |v| {
         v.into_iter().collect()
     })(input)

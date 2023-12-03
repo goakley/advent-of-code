@@ -70,7 +70,7 @@ impl Input {
                     std::fs::write(path, &data).unwrap();
                     Input { data }
                 }
-                _ => Err(e).unwrap(),
+                _ => panic!("{:?}", e),
             },
         }
     }

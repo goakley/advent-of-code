@@ -37,5 +37,5 @@ fn main() {
     )
     .parse()
     .unwrap();
-    fs::write(&dest_path, format!("{}", tokens)).unwrap();
+    fs::write(dest_path, format!("{}", tokens)).unwrap();
 }
