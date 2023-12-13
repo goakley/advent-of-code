@@ -7,18 +7,7 @@ enum Direction {
     East,
     West,
 }
-/*
-impl Direction {
-    fn shift(&self, (x, y): Coordinate) -> Coordinate {
-        match self {
-            Direction::North => (x - 1, y),
-            Direction::South => (x + 1, y),
-            Direction::West => (x, y  - 1),
-            Direction::East => (x, y  + 1),
-        }
-    }
-}
-*/
+
 #[derive(Debug, PartialEq, Eq)]
 enum Pipe {
     NorthSouth,
@@ -45,7 +34,7 @@ impl Pipe {
         }
     }
 
-    /*fn opens(&self, direction: Direction) -> bool {
+    fn opens(&self, direction: Direction) -> bool {
         let d = self.dir();
         match direction {
             Direction::North => d.0,
@@ -53,7 +42,7 @@ impl Pipe {
             Direction::South => d.2,
             Direction::West => d.3,
         }
-    }*/
+    }
 
     fn connects(&self, other: &Self, direction: Direction) -> bool {
         let a = self.dir();
@@ -97,7 +86,6 @@ fn find_pipes(grid: &Grid, point: Coordinate) -> (Coordinate, Coordinate) {
     .into_iter()
     .filter_map(|(c, d)| grid.get(&c).filter(|p| pipe.connects(p, d)).and(Some(c)))
     .collect();
-    eprintln!("{:?} {:?}", point, pipes);
     match &pipes[..] {
         [a, b, c] if grid.get(a) == Some(&Pipe::Start) => (*b, *c),
         [a, b, c] if grid.get(b) == Some(&Pipe::Start) => (*a, *c),
@@ -116,26 +104,42 @@ fn get_next_pipe(grid: &Grid, point: Coordinate, exclude: Coordinate) -> Coordin
     }
 }
 
-/*fn squeeze(grid: &Grid, wall: &HashSet<Coordinate>, (x, y): Coordinate, d: Direction) -> Coordinate {
-    let mut next = direction.shift(coordinate);
-    let forbidden: Option<Direction> = None;
-    while wall.contains(next) {
+/// Double the size of the grid, marking what's a pipe wall and what's not
+fn double(grid: &Grid, wall: &HashSet<Coordinate>) -> HashMap<Coordinate, bool> {
+    grid.iter()
+        .flat_map(|((x_, y_), pipe)| {
+            let x = *x_ * 2;
+            let y = *y_ * 2;
+            if wall.contains(&(*x_, *y_)) {
+                vec![
+                    ((x, y), true),
+                    ((x + 1, y), pipe.opens(Direction::South)),
+                    ((x, y + 1), pipe.opens(Direction::East)),
+                    ((x + 1, y + 1), false),
+                ]
+            } else {
+                vec![
+                    ((x, y), false),
+                    ((x + 1, y), false),
+                    ((x, y + 1), false),
+                    ((x + 1, y + 1), false),
+                ]
+            }
+        })
+        .collect()
+}
 
-    }
-    next
-}*/
-
+/// Flood outward from a point, determining if we've escaped the area or not
 fn expand(
-    grid: &Grid,
-    wall: &HashSet<Coordinate>,
+    walls: &HashMap<Coordinate, bool>,
     tracker: &mut HashSet<Coordinate>,
     (x, y): Coordinate,
 ) -> bool {
-    if grid.get(&(x, y)).is_none() {
+    if walls.get(&(x, y)).is_none() {
         // if we leave the grid then we've escaped
         return true;
     }
-    if wall.get(&(x, y)).is_some() {
+    if walls.get(&(x, y)) == Some(&true) {
         // if we hit a wall then we haven't escaped
         return false;
     }
@@ -145,10 +149,32 @@ fn expand(
     }
     tracker.insert((x, y));
     // escape in any direction is an escape
-    expand(grid, wall, tracker, (x - 1, y))
-        || expand(grid, wall, tracker, (x + 1, y))
-        || expand(grid, wall, tracker, (x, y - 1))
-        || expand(grid, wall, tracker, (x, y + 1))
+    expand(walls, tracker, (x - 1, y))
+        || expand(walls, tracker, (x + 1, y))
+        || expand(walls, tracker, (x, y - 1))
+        || expand(walls, tracker, (x, y + 1))
+}
+
+/// Mark all points on the (expanded) grid as either inside or not
+fn mark_inside_outside(walls: &HashMap<Coordinate, bool>) -> HashMap<Coordinate, bool> {
+    let mut inside: HashMap<Coordinate, bool> = walls
+        .iter()
+        .filter_map(|(k, v)| if *v { None } else { Some((*k, false)) })
+        .collect();
+    for (x, y) in walls
+        .iter()
+        .filter_map(|(k, v)| if *v { None } else { Some(*k) })
+    {
+        if inside.get(&(x, y)) == Some(&true) {
+            continue;
+        }
+        let mut tracker: HashSet<Coordinate> = HashSet::new();
+        let escaped = expand(walls, &mut tracker, (x, y));
+        for xy in tracker.into_iter() {
+            inside.insert(xy, !escaped);
+        }
+    }
+    inside
 }
 
 advent_2023::day_function!(10, input, {
@@ -170,7 +196,6 @@ advent_2023::day_function!(10, input, {
     seen.insert(*start);
     seen.insert(one);
     seen.insert(two);
-    eprintln!("{:?}", start);
     let mut count = 1;
     loop {
         let next_one = get_next_pipe(&grid, one, last_one);
@@ -188,37 +213,13 @@ advent_2023::day_function!(10, input, {
         seen.insert(next_one);
         seen.insert(next_two);
     }
-    let mut inside: HashMap<Coordinate, bool> = seen.iter().map(|xy| (*xy, false)).collect();
-    eprintln!("{:?}", inside);
-    for (x, y) in grid.keys() {
-        eprintln!("{:?}", (x, y, inside.contains_key(&(*x, *y))));
-        if x == &6 && y == &2 {
-            eprintln!("============");
-        }
-        if inside.contains_key(&(*x, *y)) {
-            continue;
-        }
-        let mut tracker: HashSet<Coordinate> = HashSet::new();
-        let escaped = expand(&grid, &seen, &mut tracker, (*x, *y));
-        for xy in tracker.into_iter() {
-            inside.insert(xy, !escaped);
-        }
-    }
-    let insides = inside.values().filter(|b| **b).count();
-    let (mx, my) = grid.keys().max().unwrap();
-    for x in 0..=*mx {
-        let z: String = (0..=*my)
-            .map(|y| {
-                if seen.contains(&(x, y)) {
-                    "W"
-                } else if *inside.get(&(x, y)).unwrap() {
-                    "I"
-                } else {
-                    "O"
-                }
-            })
-            .collect();
-        println!("{}", z);
-    }
-    (count.to_string(), insides.to_string())
+
+    let bigger_grid = double(&grid, &seen);
+    let insides = mark_inside_outside(&bigger_grid);
+    let inside_count = grid
+        .keys()
+        .filter(|(x, y)| *insides.get(&(x * 2, y * 2)).unwrap_or(&false))
+        .count();
+
+    (count.to_string(), inside_count.to_string())
 });
